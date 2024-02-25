@@ -1,2 +1,2 @@
-# uekat-ml
-University of Economics in Katowice - Machine Learning
+# Machine Learning 🧠
+University of Economics in Katowice

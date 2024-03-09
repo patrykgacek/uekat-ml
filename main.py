@@ -1,6 +1,5 @@
 import csv
 import os
-import numpy as np
 
 def load_data(filename):
     with open(filename, 'r') as f:

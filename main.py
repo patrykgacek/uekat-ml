@@ -176,6 +176,11 @@ def print_rows(data, padding=2, max_rows=1000):
         print("]")
 
 
+# Print line
+def print_line(size=20):
+    print("+".ljust(size, "-"), "+")
+
+
 # Main program
 files = os.listdir("data")
 for file in files:
@@ -189,29 +194,17 @@ for file in files:
     info_gains = gain_attrs(entropy, attrs_entropy)
 
     # Print results
+    padding = 36
     print_rows(data, 2, 20)
-
-    just = 36
-
-    def print_line():
-        print("+".ljust(just, "-"), "+")
-
-    print_line()
-
-    print(f"| {file}".ljust(just, " "), "|")
-
-    print_line()
-
-    print(f"| T = {entropy}".ljust(just, " "), "|")
-
-    print_line()
-
+    print_line(padding)
+    print(f"| {file}".ljust(padding, " "), "|")
+    print_line(padding)
+    print(f"| T = {entropy}".ljust(padding, " "), "|")
+    print_line(padding)
     for idx, attr in enumerate(attributes[0:-1]):
-        print(f"| Info(a{idx + 1}, T) = {attrs_entropy[idx]}".ljust(just, " "), "|")
-
-    print_line()
-
+        print(f"| Info(a{idx + 1}, T) = {attrs_entropy[idx]}".ljust(padding, " "), "|")
+    print_line(padding)
     for idx, attr in enumerate(attributes[0:-1]):
-        print(f"| Gain(a{idx + 1}, T) = {info_gains[idx]}".ljust(just, " "), "|")
-    print_line()
+        print(f"| Gain(a{idx + 1}, T) = {info_gains[idx]}".ljust(padding, " "), "|")
+    print_line(padding)
     print("\n\n\n\n")

@@ -184,13 +184,30 @@ def print_line(size=20):
 # Main program
 files = os.listdir("data")
 for file in files:
+    # Load data
+    # a1, a2, ..., an
+    # The last attribute is decisive
     data = load_data("data/" + file)
-    attributes = get_distinct_attr(data)
-    histogram = count_occur(data)
-    entropy = info(histogram[-1])
-    decisions = count_occur_decision(data, attributes)
+
+    # Total number of rows
     total = len(data)
+
+    # [[attr1, attr2, ...], ...]
+    attributes = get_distinct_attr(data)
+
+    # [[attr1: count1, attr2: count2, ...], ...]
+    histogram = count_occur(data)
+
+    # Info(T)
+    entropy = info(histogram[-1])
+
+    # [{attr1: {decision1: count1, decision2: count2, ...}, ...}, ...]
+    decisions = count_occur_decision(data, attributes)
+
+    # [Info(a1, T), Info(a2, T), ...]
     attrs_entropy = info_attrs(decisions, attributes[0:-1], histogram[0:-1], total)
+
+    # [Gain(a1, T), Gain(a2, T), ...]
     info_gains = gain_attrs(entropy, attrs_entropy)
 
     # Print results

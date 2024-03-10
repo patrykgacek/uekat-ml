@@ -176,6 +176,12 @@ def print_rows(data, padding=2, max_rows=1000):
         print("]")
 
 
+# Print result list
+def print_result_list(list, padding=2, header="Result"):
+    for idx, result in enumerate(list):
+        print(f"| {header}(a{idx + 1}, T) = {result}".ljust(padding, " "), "|")
+
+
 # Print line
 def print_line(size=20):
     print("+".ljust(size, "-"), "+")
@@ -218,10 +224,8 @@ for file in files:
     print_line(padding)
     print(f"| T = {entropy}".ljust(padding, " "), "|")
     print_line(padding)
-    for idx, attr in enumerate(attributes[0:-1]):
-        print(f"| Info(a{idx + 1}, T) = {attrs_entropy[idx]}".ljust(padding, " "), "|")
+    print_result_list(attrs_entropy, padding, "Info")
     print_line(padding)
-    for idx, attr in enumerate(attributes[0:-1]):
-        print(f"| Gain(a{idx + 1}, T) = {info_gains[idx]}".ljust(padding, " "), "|")
+    print_result_list(info_gains, padding, "Gain")
     print_line(padding)
     print("\n\n\n\n")

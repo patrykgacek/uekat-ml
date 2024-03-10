@@ -144,6 +144,38 @@ def gain_attrs(info, attrs_entropy):
     return gains
 
 
+# Print
+def print_rows(data, padding=2, max_rows=1000):
+    # Calculate max length for each attribute
+    max_len = []
+    for idx, attr in enumerate(data[0]):
+        max_len.append(len(attr))
+
+    for attr in data:
+        for idx, a in enumerate(attr):
+            if max_len[idx] < len(a):
+                max_len[idx] = len(a)
+
+    max_len = [x + padding for x in max_len]
+    sum_len = sum(max_len) + padding + 1
+
+    # Print header
+    print("[", end="".rjust(padding, " "))
+    for idx, attr in enumerate(data[0]):
+        print(f"a{idx + 1}".ljust(max_len[idx], " "), end="")
+    print("]")
+
+    # Print separator
+    print("[".ljust(sum_len, "-"), end="]\n")
+
+    # Print rows
+    for row in data[:max_rows]:
+        print("[", end="".rjust(padding, " "))
+        for idx, attr in enumerate(row):
+            print(f"{attr}".ljust(max_len[idx], " "), end="")
+        print("]")
+
+
 # Main program
 files = os.listdir("data")
 for file in files:
@@ -157,6 +189,8 @@ for file in files:
     info_gains = gain_attrs(entropy, attrs_entropy)
 
     # Print results
+    print_rows(data, 2, 20)
+
     just = 36
 
     def print_line():

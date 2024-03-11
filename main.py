@@ -1,3 +1,4 @@
+import math
 import os
 
 
@@ -71,22 +72,22 @@ def count_occur_decision(data, attributes):
 
 # Newton-Raphson method for logarithm calculation with base 2
 # Returns log2(x)
-def log2(x, epsilon=1e-15):
-    if x < 0:
-        return float("nan")
+# def log2(x, epsilon=1e-15):
+#     if x < 0:
+#         return float("nan")
 
-    if x == 0:
-        return float("-inf")
+#     if x == 0:
+#         return float("-inf")
 
-    if x == 1:
-        return 0
+#     if x == 1:
+#         return 0
 
-    n = 1.0
-    ln2 = 0.6931471805599453  # ln(2)
-    while abs(2**n - x) > epsilon:
-        # 2**n * ln(2) is the derivative of 2**n
-        n -= (2**n - x) / (2**n * ln2)
-    return n
+#     n = 1.0
+#     ln2 = 0.6931471805599453  # ln(2)
+#     while abs(2**n - x) > epsilon:
+#         # 2**n * ln(2) is the derivative of 2**n
+#         n -= (2**n - x) / (2**n * ln2)
+#     return n
 
 
 # Calculate entropy
@@ -102,7 +103,7 @@ def info(dictionary):
     for key in dictionary:
         p = dictionary[key] / total
         if p > 0:
-            entropy = entropy - p * log2(p)
+            entropy = entropy - p * math.log2(p)
 
     return entropy
 

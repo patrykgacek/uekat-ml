@@ -148,37 +148,37 @@ def gain_attrs(info, attrs_entropy):
 # Calculate split info for attribute
 # Returns SplitInfo(a, T)
 def splitinfo_attr(attr_values, histogram, total):
-  info_args = {}
-  for a_value in attr_values:
+    info_args = {}
+    for a_value in attr_values:
         info_args[a_value] = histogram[a_value] / total
-  return info(info_args)
+    return info(info_args)
 
 
 # List of split info for each attribute
 # Returns [SplitInfo(a1, T), SplitInfo(a2, T), ...]
 def splitinfo_attrs(attributes, histogram, total):
-  attrs_splitentropy = []
-  for idx_attr, attr_values in enumerate(attributes):
-      attrs_splitentropy.append(
-          splitinfo_attr(attr_values, histogram[idx_attr], total)
-      )
-  return attrs_splitentropy
+    attrs_splitentropy = []
+    for idx_attr, attr_values in enumerate(attributes):
+        attrs_splitentropy.append(
+            splitinfo_attr(attr_values, histogram[idx_attr], total)
+        )
+    return attrs_splitentropy
 
 
 # Calculate gain ratio for attribute
 # Returns GainRatio(a, T)
 def gainratio_attr(gain, splitinfo):
-  return gain / splitinfo
+    return gain / splitinfo
 
 
 # List of gain ratio for each attribute
 # Returns [GainRatio(a1, T), GainRatio(a2, T), ...]
 def gainratio_attrs(gains, splitinfos):
-  gainratios = []
-  no_results = len(gains)
-  for i in range(no_results):
-      gainratios.append(gainratio_attr(gains[i], splitinfos[i]))
-  return gainratios
+    gainratios = []
+    no_results = len(gains)
+    for i in range(no_results):
+        gainratios.append(gainratio_attr(gains[i], splitinfos[i]))
+    return gainratios
 
 
 # Print
@@ -258,7 +258,6 @@ for file in files:
 
     # [GainRatio(a1, T), GainRatio(a2, T), ...]
     gainratios = gainratio_attrs(gains, splitinfos)
-
 
     # Print results
     padding = 42

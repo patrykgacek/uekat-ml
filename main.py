@@ -226,7 +226,9 @@ def compute_values(data: list) -> dict:
     return {
         "total": total,
         "attributes": attributes,
+        "histogram": histogram,
         "entropy": entropy,
+        "decisions": decisions, 
         "attrs_entropy": attrs_entropy,
         "gains": gains,
         "splitinfos": splitinfos,
@@ -329,41 +331,19 @@ def print_line(size=20):
 
 
 # Test data from files in data folder
-def dev_test():
+def print_results():
     files = os.listdir("data")
     for file in files:
-        file = "gielda.csv"
         # Load data
         # a1, a2, ..., an
         # The last attribute is decisive
         data = load_data("data/" + file)
-
-        # Total number of rows
-        total = len(data)
-
-        # [[attr1, attr2, ...], ...]
-        attributes = get_distinct_attr(data)
-
-        # [[attr1: count1, attr2: count2, ...], ...]
-        histogram = count_occur(data)
-
-        # Info(T)
-        entropy = info(histogram[-1])
-
-        # [{attr1: {decision1: count1, decision2: count2, ...}, ...}, ...]
-        decisions = count_occur_decision(data, attributes)
-
-        # [Info(a1, T), Info(a2, T), ...]
-        attrs_entropy = info_attrs(decisions, attributes[0:-1], histogram[0:-1], total)
-
-        # [Gain(a1, T), Gain(a2, T), ...]
-        gains = gain_attrs(entropy, attrs_entropy)
-
-        # [SplitInfo(a1, T), SplitInfo(a2, T), ...]
-        splitinfos = splitinfo_attrs(attributes[0:-1], histogram[0:-1], total)
-
-        # [GainRatio(a1, T), GainRatio(a2, T), ...]
-        gainratios = gainratio_attrs(gains, splitinfos)
+        result = compute_values(data)
+        entropy = result["entropy"]
+        attrs_entropy = result["attrs_entropy"]
+        gains = result["gains"]
+        splitinfos = result["splitinfos"]
+        gainratios = result["gainratios"]
 
         # Print results
         padding = 42
@@ -381,7 +361,24 @@ def dev_test():
         print_line(padding)
         print_result_list(gainratios, padding, "GainRatio")
         print_line(padding)
-        print("\n\n\n\n")
+        print("\n" * 5)
+
+
+def print_trees():
+    files = os.listdir("data")
+    for file in files:
+        # Load data
+        # a1, a2, ..., an
+        # The last attribute is decisive
+        data = load_data("data/" + file)
+        tree = build_tree(data)
+        
+        # Print results
+        padding = 42
+        print_line(padding)
+        print(f"| {file}".ljust(padding, " "), "|")
+        print_line(padding)
+        print(tree, "\n" * 5)
 
 
 # +----------------------------------------------------+ #
@@ -396,10 +393,9 @@ def dev_test():
 # +----------------------------------------------------+ #
 #                       ~ 💙 ~
 
-# Test data from files in data folder
-# dev_test()
 
-# Build decision tree
-data = load_data("data/gielda.csv")
-tree = build_tree(data)
-print(tree)
+# Results from files in data folder
+print_results()
+
+# Trees from files in data folder
+print_trees()

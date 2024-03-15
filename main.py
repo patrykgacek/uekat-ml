@@ -168,6 +168,8 @@ def splitinfo_attrs(attributes, histogram, total):
 # Calculate gain ratio for attribute
 # Returns GainRatio(a, T)
 def gainratio_attr(gain, splitinfo):
+    if splitinfo == 0:
+        return 0
     return gain / splitinfo
 
 
@@ -179,6 +181,108 @@ def gainratio_attrs(gains, splitinfos):
     for i in range(no_results):
         gainratios.append(gainratio_attr(gains[i], splitinfos[i]))
     return gainratios
+
+
+def choose_best_attribute(gainratios):
+    return gainratios.index(max(gainratios))
+
+
+# Returns the index of the best attribute
+def compute_values(data: list) -> dict:
+    # Total number of rows
+    total = len(data)
+
+    # [[attr1, attr2, ...], ...]
+    attributes = get_distinct_attr(data)
+
+    # [[attr1: count1, attr2: count2, ...], ...]
+    histogram = count_occur(data)
+
+    # Info(T)
+    entropy = info(histogram[-1])
+
+    # [{attr1: {decision1: count1, decision2: count2, ...}, ...}, ...]
+    decisions = count_occur_decision(data, attributes)
+
+    # [Info(a1, T), Info(a2, T), ...]
+    attrs_entropy = info_attrs(decisions, attributes[0:-1], histogram[0:-1], total)
+
+    # [Gain(a1, T), Gain(a2, T), ...]
+    gains = gain_attrs(entropy, attrs_entropy)
+
+    # [SplitInfo(a1, T), SplitInfo(a2, T), ...]
+    splitinfos = splitinfo_attrs(attributes[0:-1], histogram[0:-1], total)
+
+    # [GainRatio(a1, T), GainRatio(a2, T), ...]
+    gainratios = gainratio_attrs(gains, splitinfos)
+
+    # Choose best attribute
+    best_attr_idx = choose_best_attribute(gainratios)
+
+    # Zero gain ratio
+    zero_gain = gainratios[best_attr_idx] == 0
+
+    # Return result
+    return {
+        "total": total,
+        "attributes": attributes,
+        "entropy": entropy,
+        "attrs_entropy": attrs_entropy,
+        "gains": gains,
+        "splitinfos": splitinfos,
+        "gainratios": gainratios,
+        "best_attr_idx": best_attr_idx,
+        "zero_gain": zero_gain,
+    }
+
+
+# Build decision tree
+def build_tree(data: list, value=None, level=0):
+    n = Node()
+    n.value = value
+    n.level = level
+    results = compute_values(data)
+    best_attr_idx = results["best_attr_idx"]
+    zero_gain = results["zero_gain"]
+    attributes = results["attributes"]
+    if not zero_gain:
+        # Set attribute for node
+        n.attrIdx = best_attr_idx
+        for value in attributes[best_attr_idx]:
+            # Create child data
+            child_data = [row for row in data if row[best_attr_idx] == value]
+            # Build child tree
+            child = build_tree(child_data, value, level + 1)
+            n.childrens.append(child)
+    else:
+        # Set decision for leaf
+        n.decision = data[0][-1]
+
+    return n
+
+
+# Decision tree node
+class Node:
+    def __init__(self):
+        self.attrIdx = None
+        self.decision = None
+        self.value = None
+        self.level = 0
+        self.childrens = []
+
+    def __str__(self):
+        childrens = ""
+        for child in self.childrens:
+            childrens += "\n    "
+            childrens += "    " * self.level
+            childrens += f"{child}"
+        n1 = f" Attribute {self.attrIdx}:"
+        n2 = f" Decision: {self.decision}"
+        node = n1 if self.attrIdx else n2
+        v1 = f" Value: {self.value} ->"
+        v2 = f" Value: Root ->"
+        value = v1 if self.value else v2
+        return f"└─ Node {self.level}:{value}{node}{childrens}"
 
 
 # Print
@@ -224,55 +328,78 @@ def print_line(size=20):
     print("+".ljust(size, "-"), "+")
 
 
-# Main program
-files = os.listdir("data")
-for file in files:
-    # Load data
-    # a1, a2, ..., an
-    # The last attribute is decisive
-    data = load_data("data/" + file)
+# Test data from files in data folder
+def dev_test():
+    files = os.listdir("data")
+    for file in files:
+        file = "gielda.csv"
+        # Load data
+        # a1, a2, ..., an
+        # The last attribute is decisive
+        data = load_data("data/" + file)
 
-    # Total number of rows
-    total = len(data)
+        # Total number of rows
+        total = len(data)
 
-    # [[attr1, attr2, ...], ...]
-    attributes = get_distinct_attr(data)
+        # [[attr1, attr2, ...], ...]
+        attributes = get_distinct_attr(data)
 
-    # [[attr1: count1, attr2: count2, ...], ...]
-    histogram = count_occur(data)
+        # [[attr1: count1, attr2: count2, ...], ...]
+        histogram = count_occur(data)
 
-    # Info(T)
-    entropy = info(histogram[-1])
+        # Info(T)
+        entropy = info(histogram[-1])
 
-    # [{attr1: {decision1: count1, decision2: count2, ...}, ...}, ...]
-    decisions = count_occur_decision(data, attributes)
+        # [{attr1: {decision1: count1, decision2: count2, ...}, ...}, ...]
+        decisions = count_occur_decision(data, attributes)
 
-    # [Info(a1, T), Info(a2, T), ...]
-    attrs_entropy = info_attrs(decisions, attributes[0:-1], histogram[0:-1], total)
+        # [Info(a1, T), Info(a2, T), ...]
+        attrs_entropy = info_attrs(decisions, attributes[0:-1], histogram[0:-1], total)
 
-    # [Gain(a1, T), Gain(a2, T), ...]
-    gains = gain_attrs(entropy, attrs_entropy)
+        # [Gain(a1, T), Gain(a2, T), ...]
+        gains = gain_attrs(entropy, attrs_entropy)
 
-    # [SplitInfo(a1, T), SplitInfo(a2, T), ...]
-    splitinfos = splitinfo_attrs(attributes[0:-1], histogram[0:-1], total)
+        # [SplitInfo(a1, T), SplitInfo(a2, T), ...]
+        splitinfos = splitinfo_attrs(attributes[0:-1], histogram[0:-1], total)
 
-    # [GainRatio(a1, T), GainRatio(a2, T), ...]
-    gainratios = gainratio_attrs(gains, splitinfos)
+        # [GainRatio(a1, T), GainRatio(a2, T), ...]
+        gainratios = gainratio_attrs(gains, splitinfos)
 
-    # Print results
-    padding = 42
-    print_rows(data, 2, 20)
-    print_line(padding)
-    print(f"| {file}".ljust(padding, " "), "|")
-    print_line(padding)
-    print(f"| T = {entropy}".ljust(padding, " "), "|")
-    print_line(padding)
-    print_result_list(attrs_entropy, padding, "Info")
-    print_line(padding)
-    print_result_list(gains, padding, "Gain")
-    print_line(padding)
-    print_result_list(splitinfos, padding, "SplitInfo")
-    print_line(padding)
-    print_result_list(gainratios, padding, "GainRatio")
-    print_line(padding)
-    print("\n\n\n\n")
+        # Print results
+        padding = 42
+        print_rows(data, 2, 20)
+        print_line(padding)
+        print(f"| {file}".ljust(padding, " "), "|")
+        print_line(padding)
+        print(f"| T = {entropy}".ljust(padding, " "), "|")
+        print_line(padding)
+        print_result_list(attrs_entropy, padding, "Info")
+        print_line(padding)
+        print_result_list(gains, padding, "Gain")
+        print_line(padding)
+        print_result_list(splitinfos, padding, "SplitInfo")
+        print_line(padding)
+        print_result_list(gainratios, padding, "GainRatio")
+        print_line(padding)
+        print("\n\n\n\n")
+
+
+# +----------------------------------------------------+ #
+# |       /                                \           | #
+# |      / Uniwersytet Ekonomiczny w Katowicach  /     | #
+# |     /                                    \  /      | #
+# |    /            Systemy uczące się        \        | #
+# |  //      II Stopień 2023/2024 Sem. letni   \       | #
+# | //                                      /   \      | #
+# |//     </>      Autor: Patryk Gacek     /     \\    | #
+# |/                                     //       \\   | #
+# +----------------------------------------------------+ #
+#                       ~ 💙 ~
+
+# Test data from files in data folder
+# dev_test()
+
+# Build decision tree
+data = load_data("data/gielda.csv")
+tree = build_tree(data)
+print(tree)

@@ -278,12 +278,14 @@ class Node:
             childrens += "\n    "
             childrens += "    " * self.level
             childrens += f"{child}"
-        n1 = f" Attribute {self.attrIdx}:"
-        n2 = f" Decision: {self.decision}"
-        node = n1 if self.attrIdx is not None else n2
-        v1 = f" Value: {self.value} ->"
-        v2 = f" Value: Root ->"
-        value = v1 if self.value is not None else v2
+        node = (
+            f" Attribute a{self.attrIdx + 1}:"
+            if self.attrIdx is not None
+            else f" Decision: {self.decision}"
+        )
+        value = (
+            f" Value: {self.value} ->" if self.value is not None else f" Value: Root ->"
+        )
         return f"└─ Node {self.level}:{value}{node}{childrens}"
 
 

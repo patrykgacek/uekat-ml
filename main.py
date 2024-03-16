@@ -228,7 +228,7 @@ def compute_values(data: list) -> dict:
         "attributes": attributes,
         "histogram": histogram,
         "entropy": entropy,
-        "decisions": decisions, 
+        "decisions": decisions,
         "attrs_entropy": attrs_entropy,
         "gains": gains,
         "splitinfos": splitinfos,
@@ -372,7 +372,7 @@ def print_trees():
         # The last attribute is decisive
         data = load_data("data/" + file)
         tree = build_tree(data)
-        
+
         # Print results
         padding = 42
         print_line(padding)
